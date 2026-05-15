@@ -27,9 +27,6 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code
-
       - name: Run Claude Code
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
@@ -39,7 +36,7 @@ jobs:
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          claude-code "
+          npx -y @anthropic-ai/claude-code "
           处理 GitHub Issue #${ISSUE_NUMBER}: ${ISSUE_TITLE}
 
           Issue 内容:
