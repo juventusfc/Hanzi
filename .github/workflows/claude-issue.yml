@@ -36,7 +36,7 @@ jobs:
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          npx -y @anthropic-ai/claude-code "
+          npx -y @anthropic-ai/claude-code --yes --non-interactive --prompt "
           处理 GitHub Issue #${ISSUE_NUMBER}: ${ISSUE_TITLE}
 
           Issue 内容:
