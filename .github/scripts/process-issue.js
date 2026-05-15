@@ -262,12 +262,46 @@ PR 描述
 - 新增汉字时，在 HANZI_DATA 对象中添加新条目
 - SVG 路径要合理，参考已有数据的格式（viewBox="0 0 60 85"）`;
 
-    const userPrompt = `处理 GitHub Issue #${ISSUE_NUMBER}: ${ISSUE_TITLE}
+    const userPrompt = `请处理以下 GitHub Issue：
 
-Issue 内容:
+Issue #${ISSUE_NUMBER}: ${ISSUE_TITLE}
+
+内容:
 ${ISSUE_BODY}
 
-请根据规范处理此 Issue。修改文件时请输出文件的完整内容。`;
+---
+
+请按照以下步骤处理：
+
+1. 分析用户需求（添加新汉字、修复 bug、还是改进功能）
+2. 确定需要修改的文件
+3. 生成修改后的文件完整内容
+
+**重要输出要求**：
+必须严格按照以下格式输出，不要有任何偏差：
+
+<<<file:data.js>>>
+这里放 data.js 的完整内容，包括：
+- 文件开头的注释
+- const HANZI_DATA = { ... } 对象（包含所有已有汉字+新汉字）
+- 底部的三个函数 getHanziList、getHanziEvolution、hasHanzi
+<file>
+
+<<<commit>>>
+feat: 新增汉字「X」
+<commit>
+
+<<<prTitle>>>
+feat: 新增汉字「X」
+<prTitle>
+
+<<<prBody>>>
+新增汉字「X」的演化数据
+
+Closes #${ISSUE_NUMBER}
+<prBody>
+
+现在请开始处理。`;
 
     // 调用 AI
     console.log('📤 正在调用智谱 API...');
@@ -277,6 +311,10 @@ ${ISSUE_BODY}
     ]);
 
     console.log('📥 AI 响应长度:', aiResponse.length);
+    console.log('📄 AI 响应内容:');
+    console.log('---');
+    console.log(aiResponse);
+    console.log('---');
 
     // 解析响应
     const actions = parseAIResponse(aiResponse);
