@@ -36,21 +36,7 @@ jobs:
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          cat << EOF | npx -y @anthropic-ai/claude-code
-          处理 GitHub Issue #${ISSUE_NUMBER}: ${ISSUE_TITLE}
-
-          Issue 内容:
-          ${ISSUE_BODY}
-
-          请根据 CLAUDE.md 中的规范处理此 Issue：
-          1. 如果是新增汉字，在 data.js 中添加该字的数据
-          2. 确保四个字形阶段都有完整的 SVG 路径和描述
-          3. 运行 node tests/validate-data.js 验证
-          4. 创建分支并提交
-          5. 创建 Pull Request
-
-          参考已有汉字的格式来生成新数据。
-          EOF
+          printf "处理 GitHub Issue #%s: %s\n\nIssue 内容:\n%s\n\n请根据 CLAUDE.md 中的规范处理此 Issue。如果是新增汉字，在 data.js 中添加该字的数据，确保四个字形阶段都有完整的 SVG 路径和描述。运行 node tests/validate-data.js 验证，然后创建分支、提交并创建 Pull Request。\n" "$ISSUE_NUMBER" "$ISSUE_TITLE" "$ISSUE_BODY" | npx -y @anthropic-ai/claude-code
 
       - name: Comment on Issue (failure)
         if: failure()
