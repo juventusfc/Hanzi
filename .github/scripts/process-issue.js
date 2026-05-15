@@ -186,59 +186,22 @@ async function main() {
     const dataJs = readFile('data.js');
 
     // 构建提示词
-    // 获取当前已有的汉字
-    let hanziNames = '';
-    if (dataJs) {
-      const matches = dataJs.match(/"([\u4e00-\u9fa5]+)":/g);
-      if (matches) {
-        hanziNames = matches.map(h => h.replace(/":/g, '').replace(/"/g, '')).join('、');
-      }
-    }
-
     const systemPrompt = `你是一个专业的软件开发助手，负责处理汉字演化查询网站的 GitHub Issue。
 
-项目规范：
+【项目规范】
 ${claudeMd}
 
-当前 data.js 中已有的汉字：${hanziNames || '无'}
-
-data.js 文件结构示例：
+【当前 data.js 完整内容】
 \`\`\`javascript
-/**
- * 汉字演化数据
- * 每个汉字包含四个字形阶段：甲骨文(oracle)、金文(bronze)、小篆(seal)、楷书(regular)
- */
-
-const HANZI_DATA = {
-  "人": {
-    char: "人",
-    oracle: { svg: "SVG路径", desc: "描述" },
-    bronze: { svg: "SVG路径", desc: "描述" },
-    seal: { svg: "SVG路径", desc: "描述" },
-    regular: { char: "人", desc: "描述" },
-    meaning: "字义说明"
-  }
-};
-
-function getHanziList() {
-  return Object.keys(HANZI_DATA).sort();
-}
-
-function getHanziEvolution(char) {
-  return HANZI_DATA[char] || null;
-}
-
-function hasHanzi(char) {
-  return char in HANZI_DATA;
-}
+${dataJs}
 \`\`\`
 
 请分析用户的 Issue，然后执行相应的操作。
 
-输出格式要求：
+【输出格式要求】
 1. 如果需要修改文件，使用以下格式：
 <<<file:文件路径>>>
-文件的完整内容（从第一行到最后一行，包括注释和所有函数）
+文件的完整内容（从第一行到最后一行）
 <file>
 
 2. 提交信息格式：
@@ -256,11 +219,11 @@ PR 标题
 PR 描述
 <prBody>
 
-重要规则：
-- 修改 data.js 时，必须输出文件的完整内容
-- 必须保留文件开头的注释、所有已有的汉字数据、以及底部的三个函数
-- 新增汉字时，在 HANZI_DATA 对象中添加新条目
-- SVG 路径要合理，参考已有数据的格式（viewBox="0 0 60 85"）`;
+【重要规则】
+- 修改 data.js 时，必须输出文件的完整内容，保留所有已有数据
+- 新增汉字时，在 HANZI_DATA 对象末尾添加新条目
+- SVG 路径格式：viewBox="0 0 60 85"，stroke-width="2"
+- 参考已有汉字的 SVG 路径和描述风格来生成新汉字的数据`;
 
     const userPrompt = `请处理以下 GitHub Issue：
 
@@ -358,7 +321,7 @@ Closes #${ISSUE_NUMBER}
     const commitMessage = actions.commitMessage || `chore: 处理 Issue #${ISSUE_NUMBER}`;
     console.log('✅ 提交更改:', commitMessage);
     execCommand('git', ['add', '-A']);
-    execCommand('git', ['commit', '-m', commitMessage]);
+    execCommand('git', ['commit', '-m', `"${commitMessage}"`]);
 
     // 推送分支
     console.log('📤 推送分支...');
