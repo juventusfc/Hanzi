@@ -186,20 +186,59 @@ async function main() {
     const dataJs = readFile('data.js');
 
     // 构建提示词
+    // 获取当前已有的汉字
+    let hanziNames = '';
+    if (dataJs) {
+      const matches = dataJs.match(/"([\u4e00-\u9fa5]+)":/g);
+      if (matches) {
+        hanziNames = matches.map(h => h.replace(/":/g, '').replace(/"/g, '')).join('、');
+      }
+    }
+
     const systemPrompt = `你是一个专业的软件开发助手，负责处理汉字演化查询网站的 GitHub Issue。
 
 项目规范：
 ${claudeMd}
 
-当前 data.js 中的汉字列表：
-${Object.keys(dataJs.match(/"[\u4e00-\u9fa5]+"/g) || []).join('、')}
+当前 data.js 中已有的汉字：${hanziNames || '无'}
+
+data.js 文件结构示例：
+\`\`\`javascript
+/**
+ * 汉字演化数据
+ * 每个汉字包含四个字形阶段：甲骨文(oracle)、金文(bronze)、小篆(seal)、楷书(regular)
+ */
+
+const HANZI_DATA = {
+  "人": {
+    char: "人",
+    oracle: { svg: "SVG路径", desc: "描述" },
+    bronze: { svg: "SVG路径", desc: "描述" },
+    seal: { svg: "SVG路径", desc: "描述" },
+    regular: { char: "人", desc: "描述" },
+    meaning: "字义说明"
+  }
+};
+
+function getHanziList() {
+  return Object.keys(HANZI_DATA).sort();
+}
+
+function getHanziEvolution(char) {
+  return HANZI_DATA[char] || null;
+}
+
+function hasHanzi(char) {
+  return char in HANZI_DATA;
+}
+\`\`\`
 
 请分析用户的 Issue，然后执行相应的操作。
 
 输出格式要求：
 1. 如果需要修改文件，使用以下格式：
 <<<file:文件路径>>>
-文件完整内容
+文件的完整内容（从第一行到最后一行，包括注释和所有函数）
 <<</file>
 
 2. 提交信息格式：
@@ -218,9 +257,10 @@ PR 描述
 <<</prBody>
 
 重要规则：
-- 新增汉字时，确保四个字形阶段都有完整内容
-- SVG 路径要合理，参考已有数据的格式
-- 如果用户没有提供字形数据，根据字源知识创建合理的 SVG`;
+- 修改 data.js 时，必须输出文件的完整内容
+- 必须保留文件开头的注释、所有已有的汉字数据、以及底部的三个函数
+- 新增汉字时，在 HANZI_DATA 对象中添加新条目
+- SVG 路径要合理，参考已有数据的格式（viewBox="0 0 60 85"）`;
 
     const userPrompt = `处理 GitHub Issue #${ISSUE_NUMBER}: ${ISSUE_TITLE}
 
