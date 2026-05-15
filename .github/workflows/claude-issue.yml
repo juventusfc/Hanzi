@@ -30,18 +30,10 @@ jobs:
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: Configure Claude Code
-        run: |
-          mkdir -p ~/.config/claude-code
-          cat > ~/.config/claude-code/config.json << EOF
-          {
-            "apiKey": "${{ secrets.ZHIPU_API_KEY }}",
-            "apiUrl": "https://open.bigmodel.cn/api/anthropic"
-          }
-          EOF
-
       - name: Run Claude Code
         env:
+          ANTHROPIC_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+          ANTHROPIC_BASE_URL: https://open.bigmodel.cn/api/anthropic
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
