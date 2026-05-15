@@ -13,7 +13,7 @@ jobs:
   process-issue:
     name: Process Issue with AI
     runs-on: ubuntu-latest
-    # 只处理有特定标签的 Issue，避免误触发
+    # 只处理有特定标签的 Issue
     if: |
       contains(github.event.issue.labels.*.name, 'enhancement') ||
       contains(github.event.issue.labels.*.name, 'bug')
@@ -27,18 +27,41 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Process Issue with Zhipu AI
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Configure Claude Code
+        run: |
+          mkdir -p ~/.config/claude-code
+          cat > ~/.config/claude-code/config.json << EOF
+          {
+            "apiKey": "${{ secrets.ZHIPU_API_KEY }}",
+            "apiUrl": "https://open.bigmodel.cn/api/anthropic"
+          }
+          EOF
+
+      - name: Run Claude Code
         env:
-          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
-          REPO_OWNER: ${{ github.repository_owner }}
-          REPO_NAME: ${{ github.event.repository.name }}
         run: |
-          chmod +x .github/scripts/process-issue.js
-          node .github/scripts/process-issue.js
+          claude-code "
+          处理 GitHub Issue #${ISSUE_NUMBER}: ${ISSUE_TITLE}
+
+          Issue 内容:
+          ${ISSUE_BODY}
+
+          请根据 CLAUDE.md 中的规范处理此 Issue：
+          1. 如果是新增汉字，在 data.js 中添加该字的数据
+          2. 确保四个字形阶段都有完整的 SVG 路径和描述
+          3. 运行 node tests/validate-data.js 验证
+          4. 创建分支并提交
+          5. 创建 Pull Request
+
+          参考已有汉字的格式来生成新数据。
+          "
 
       - name: Comment on Issue (failure)
         if: failure()
