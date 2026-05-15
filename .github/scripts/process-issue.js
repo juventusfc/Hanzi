@@ -149,26 +149,26 @@ function parseAIResponse(response) {
   };
 
   // 解析文件修改
-  const filePattern = /<<<file:([^>]+)>>>\n([\s\S]*?)\n<<<\/file>/g;
+  const filePattern = /<<<file:([^>]+)>>>\n([\s\S]*?)\n<file>/g;
   let match;
   while ((match = filePattern.exec(response)) !== null) {
     result.files[match[1]] = match[2];
   }
 
   // 解析提交信息
-  const commitMatch = response.match(/<<<commit>>>\n(.+?)\n<<<\/commit>/);
+  const commitMatch = response.match(/<<<commit>>>\n(.+?)\n<commit>/);
   if (commitMatch) {
     result.commitMessage = commitMatch[1].trim();
   }
 
   // 解析 PR 标题
-  const prTitleMatch = response.match(/<<<prTitle>>>\n(.+?)\n<<<\/prTitle>/);
+  const prTitleMatch = response.match(/<<<prTitle>>>\n(.+?)\n<prTitle>/);
   if (prTitleMatch) {
     result.prTitle = prTitleMatch[1].trim();
   }
 
   // 解析 PR 内容
-  const prBodyMatch = response.match(/<<<prBody>>>\n([\s\S]*?)\n<<<\/prBody>/);
+  const prBodyMatch = response.match(/<<<prBody>>>\n([\s\S]*?)\n<prBody>/);
   if (prBodyMatch) {
     result.prBody = prBodyMatch[1].trim();
   }
@@ -239,22 +239,22 @@ function hasHanzi(char) {
 1. 如果需要修改文件，使用以下格式：
 <<<file:文件路径>>>
 文件的完整内容（从第一行到最后一行，包括注释和所有函数）
-<<</file>
+<file>
 
 2. 提交信息格式：
 <<<commit>>>
 type: 简短描述
-<<</commit>
+<commit>
 
 3. PR 标题格式：
 <<<prTitle>>>
 PR 标题
-<<</prTitle>
+<prTitle>
 
 4. PR 内容格式：
 <<<prBody>>>
 PR 描述
-<<</prBody>
+<prBody>
 
 重要规则：
 - 修改 data.js 时，必须输出文件的完整内容
