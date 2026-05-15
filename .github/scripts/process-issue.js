@@ -160,10 +160,19 @@ ${dataJs}
     }
 
     // 提交
-    const commitMsg = `feat: ${ISSUE_TITLE.replace('[用户反馈] ', '').trim()}`;
+    let commitMsg = ISSUE_TITLE.replace('[用户反馈] ', '').trim();
+    if (commitMsg === '请在这里描述您的建议' || !commitMsg) {
+      // 从 Issue body 中提取汉字
+      const hanziMatch = ISSUE_BODY.match(/汉字[：:]\s*([^\s\n]+)/);
+      if (hanziMatch) {
+        commitMsg = `新增汉字「${hanziMatch[1]}」`;
+      } else {
+        commitMsg = `处理 Issue #${ISSUE_NUMBER}`;
+      }
+    }
     console.log('✅ 提交:', commitMsg);
     execCommand('git add -A');
-    execCommand(`git commit -m "${commitMsg}"`);
+    execCommand(`git commit -m "feat: ${commitMsg}"`);
 
     // 推送
     console.log('📤 推送分支...');
@@ -171,17 +180,24 @@ ${dataJs}
 
     // 创建 PR
     console.log('🔀 创建 PR...');
-    const pr = await httpsPost(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/pulls`,
-      {
-        title: commitMsg,
-        body: `自动处理 Issue #${ISSUE_NUMBER}\n\nCloses #${ISSUE_NUMBER}`,
-        head: branchName,
-        base: 'main'
-      }
-    );
-
-    console.log('✅ PR 创建成功:', pr.html_url);
+    let prUrl = '';
+    try {
+      const pr = await httpsPost(
+        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/pulls`,
+        {
+          title: commitMsg,
+          body: `自动处理 Issue #${ISSUE_NUMBER}\n\nCloses #${ISSUE_NUMBER}`,
+          head: branchName,
+          base: 'main'
+        }
+      );
+      prUrl = pr.html_url;
+      console.log('✅ PR 创建成功:', prUrl);
+    } catch (error) {
+      console.log('⚠️ PR 创建失败:', error.message);
+      console.log('分支已推送，请手动创建 PR');
+      prUrl = `https://github.com/${REPO_OWNER}/${REPO_NAME}/compare/main...${branchName}`;
+    }
 
     // 评论
     await httpsPost(
@@ -189,10 +205,10 @@ ${dataJs}
       {
         body: `✅ AI 处理完成！
 
-**分支**: ${branchName}
-**PR**: ${pr.html_url}
+**分支**: \`${branchName}\`
+**PR**: ${prUrl}
 
-请 review 后合并。`
+请 review 后合并即可自动部署上线。`
       }
     );
 
