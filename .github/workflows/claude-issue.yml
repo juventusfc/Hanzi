@@ -1,0 +1,79 @@
+name: Claude Code Issue Handler
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  process-issue:
+    name: Process Issue with Claude Code
+    runs-on: ubuntu-latest
+    # 只处理有特定标签的 Issue，避免误触发
+    if: |
+      contains(github.event.issue.labels.*.name, 'enhancement') ||
+      contains(github.event.issue.labels.*.name, 'bug')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install -g @anthropic-ai/claude-code
+
+      - name: Run Claude Code
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          claude-code \
+            --prompt "处理 GitHub Issue #${ISSUE_NUMBER}: ${ISSUE_TITLE}
+
+          Issue 内容:
+          ${ISSUE_BODY}
+
+          请根据 CLAUDE.md 中的规范处理此 Issue。如果需要添加新汉字，请修改 data.js 文件；如果是 UI 改动，请修改相应的 HTML/CSS 文件。
+
+          完成后请:
+          1. 运行测试验证数据结构
+          2. 创建一个新的分支
+          3. 提交更改
+          4. 创建 Pull Request" \
+            --api-key "${ANTHROPIC_API_KEY}"
+
+      - name: Comment on Issue
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ 已收到您的反馈！Claude Code 正在处理中，请稍候...'
+            })
+
+      - name: Comment on Issue (failure)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ 处理失败，请检查日志或联系维护者。'
+            })

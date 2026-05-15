@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="汉字演化查询 - 探索汉字从甲骨文到楷书的演变历程">
+  <title>汉字演化查询</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <h1 class="title">汉字演化查询</h1>
+    <p class="subtitle">探索汉字从甲骨文到楷书的演变历程</p>
+  </header>
+
+  <main class="main">
+    <section class="search-section">
+      <div class="search-box">
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="输入单个汉字..."
+          maxlength="1"
+          autocomplete="off"
+        >
+        <button id="searchBtn" class="search-btn">查询</button>
+      </div>
+      <div id="errorMessage" class="error-message"></div>
+    </section>
+
+    <section id="resultSection" class="result-section hidden">
+      <div class="hanzi-header">
+        <h2 id="hanziChar" class="hanzi-char"></h2>
+        <p id="hanziMeaning" class="hanzi-meaning"></p>
+      </div>
+
+      <div class="evolution-timeline">
+        <div class="evolution-stage">
+          <div class="stage-label">甲骨文</div>
+          <div class="stage-content">
+            <svg id="oracleSvg" class="stage-svg" viewBox="0 0 60 85" xmlns="http://www.w3.org/2000/svg"></svg>
+            <p id="oracleDesc" class="stage-desc"></p>
+          </div>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="evolution-stage">
+          <div class="stage-label">金文</div>
+          <div class="stage-content">
+            <svg id="bronzeSvg" class="stage-svg" viewBox="0 0 60 85" xmlns="http://www.w3.org/2000/svg"></svg>
+            <p id="bronzeDesc" class="stage-desc"></p>
+          </div>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="evolution-stage">
+          <div class="stage-label">小篆</div>
+          <div class="stage-content">
+            <svg id="sealSvg" class="stage-svg" viewBox="0 0 60 85" xmlns="http://www.w3.org/2000/svg"></svg>
+            <p id="sealDesc" class="stage-desc"></p>
+          </div>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="evolution-stage">
+          <div class="stage-label">楷书</div>
+          <div class="stage-content">
+            <div id="regularChar" class="regular-char"></div>
+            <p id="regularDesc" class="stage-desc"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="quickAccess" class="quick-access">
+      <h3 class="quick-access-title">快速查询</h3>
+      <div id="hanziGrid" class="hanzi-grid"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a
+      href="https://github.com/frankhu123/Hanzi/issues/new?template=feature_request.md&title=%E7%94%A8%E6%88%B7%E5%8F%8D%E9%A6%88%3A+%E8%AF%B7%E5%9C%A8%E8%BF%99%E9%87%8C%E6%8F%8F%E8%BF%B0%E6%82%A8%E7%9A%84%E5%BB%BA%E8%AE%AE"
+      class="feedback-btn"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      💡 建议新汉字 / 反馈问题
+    </a>
+    <p class="footer-text">由 AI 驱动自动演化 | GitHub Pages 部署</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
